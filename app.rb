@@ -7,6 +7,7 @@ require 'erubi'
 require 'faraday'
 require 'json'
 require 'json/jwt'
+require 'jwe'
 require 'jwt'
 require 'openssl'
 require 'securerandom'
@@ -35,6 +36,27 @@ module LoginGov::OidcSinatra
 
     def config
       @config ||= Config.new
+    end
+
+    get '/attempt-events' do
+      auth_token = 'abc123'
+
+      conn = Faraday.new(
+        url: "http://localhost:3000",
+      )
+
+      resp = conn.post(
+        '/api/irs_attempts_api/security_events',
+        nil,
+        {"Authorization" => "Bearer #{auth_token}"}
+      )
+
+      events = JSON.parse(resp.body)
+      erb :attempt_events,
+          locals: {
+            events: events['sets'],
+            private_key: OpenSSL::PKey::RSA.new(File.read("config/irs_key.key"))
+          }
     end
 
     get '/' do
