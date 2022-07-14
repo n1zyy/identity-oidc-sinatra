@@ -1,0 +1,9 @@
+<h1>Events</h1>
+
+<% events.each do |event| %>
+  <h2><%= event[0] %></h2>
+  <%# "padding check failed" probably means you're using the wrong key! %>
+  <textarea>
+  <%= JSON.parse(JWE.decrypt(event[1], private_key)) rescue "error" %>
+  </textarea>
+<% end %>
